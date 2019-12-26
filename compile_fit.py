@@ -1,5 +1,8 @@
 import tensorflow as tf
 from tensorflow.python.keras import datasets, layers, optimizers, Sequential, metrics
+import os
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+
 
 def preprocess(x, y):
     x = tf.cast(x, dtype=tf.float32) / 255.
