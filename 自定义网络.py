@@ -90,6 +90,8 @@ class MyNetwork(keras.Model):
 
 
 network = MyNetwork()
+# print(network.trainable_variables)  # 这里显示自定义的网络中的变量
+
 network.compile(optimizer=optimizers.Adam(lr=1e-3),
                 loss=tf.losses.CategoricalCrossentropy(from_logits=True),
                 metrics=['accuracy'])
