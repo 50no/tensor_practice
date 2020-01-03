@@ -1,5 +1,5 @@
 import  tensorflow as tf
-from    tensorflow.python.keras import datasets, layers, optimizers, Sequential, metrics
+from    tensorflow.keras import datasets, layers, optimizers, Sequential, metrics
 from 	tensorflow import keras
 import  os
 
@@ -8,27 +8,19 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 def preprocess(x, y):
     # [0~255] => [-1~1]
-
     x = 2 * tf.cast(x, dtype=tf.float32) / 255. - 1.
-    x = tf.reshape(x, [32 * 32 * 3])
-    # print(x.shape)
     y = tf.cast(y, dtype=tf.int32)
-    y = tf.squeeze(y)
-    y = tf.one_hot(y, depth=10)
     return x,y
 
 
 batchsz = 128
 # [50k, 32, 32, 3], [10k, 1]
 (x, y), (x_val, y_val) = datasets.cifar10.load_data()
-# print(type(y))
-# print(y.shape)
-# print(x.shape)
-# y = tf.squeeze(y)
-# y_val = tf.squeeze(y_val)
-# y = tf.one_hot(y, depth=10) # [50k, 10]
-# y_val = tf.one_hot(y_val, depth=10) # [10k, 10]
-# print('datasets:', x.shape, y.shape, x_val.shape, y_val.shape, x.min(), x.max())
+y = tf.squeeze(y)
+y_val = tf.squeeze(y_val)
+y = tf.one_hot(y, depth=10) # [50k, 10]
+y_val = tf.one_hot(y_val, depth=10) # [10k, 10]
+print('datasets:', x.shape, y.shape, x_val.shape, y_val.shape, x.min(), x.max())
 
 
 train_db = tf.data.Dataset.from_tensor_slices((x,y))
@@ -37,23 +29,25 @@ test_db = tf.data.Dataset.from_tensor_slices((x_val, y_val))
 test_db = test_db.map(preprocess).batch(batchsz)
 
 
-# sample = next(iter(train_db))
-# print('batch:', sample[0].shape, sample[1].shape)
+sample = next(iter(train_db))
+print('batch:', sample[0].shape, sample[1].shape)
 
-"""制作自己的层"""
+
 class MyDense(layers.Layer):
     # to replace standard layers.Dense()
     def __init__(self, inp_dim, outp_dim):
-        super(MyDense, self).__init__()  # 这个父类一千多行，若干函数
-        self.kernel = self.add_variable('w', [inp_dim, outp_dim])  # 权重和偏置
+        super(MyDense, self).__init__()
+
+        self.kernel = self.add_variable('w', [inp_dim, outp_dim])
         # self.bias = self.add_variable('b', [outp_dim])
 
     def call(self, inputs, training=None):
+
         x = inputs @ self.kernel
         return x
 
-"""根据自己的层制作自己的网"""
 class MyNetwork(keras.Model):
+
     def __init__(self):
         super(MyNetwork, self).__init__()
 
@@ -62,6 +56,8 @@ class MyNetwork(keras.Model):
         self.fc3 = MyDense(128, 64)
         self.fc4 = MyDense(64, 32)
         self.fc5 = MyDense(32, 10)
+
+
 
     def call(self, inputs, training=None):
         """
@@ -90,8 +86,6 @@ class MyNetwork(keras.Model):
 
 
 network = MyNetwork()
-# print(network.trainable_variables)  # 这里显示自定义的网络中的变量
-
 network.compile(optimizer=optimizers.Adam(lr=1e-3),
                 loss=tf.losses.CategoricalCrossentropy(from_logits=True),
                 metrics=['accuracy'])
