@@ -21,7 +21,7 @@ def preprocess(x, y):
 (x,y), (x_test, y_test) = datasets.cifar100.load_data()
 y = tf.squeeze(y, axis=1)
 y_test = tf.squeeze(y_test, axis=1)
-# print(x.shape, y.shape, x_test.shape, y_test.shape)
+print(x.shape, y.shape, x_test.shape, y_test.shape)
 
 
 train_db = tf.data.Dataset.from_tensor_slices((x,y))
@@ -48,9 +48,9 @@ network.compile(optimizer=optimizers.Adam(lr=0.01),  # 优化器，用来优化�
 network.fit(train_db,  # 训练用哪个数据集，！！！！！
             # 这里db的标签需要提前进行onehot编码
             # x也是需要提前reshape的
-            epochs=50,  # 训练多少轮
+            epochs=1,  # 训练多少轮
             validation_data=test_db,  # 测试用哪个数据集
-            validation_freq=3  # 测试的间隔：每两个epoch就测试一次
+            validation_freq=1  # 测试的间隔：每两个epoch就测试一次
             )
 network.evaluate(test_db)
 
