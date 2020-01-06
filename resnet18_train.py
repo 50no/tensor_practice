@@ -25,37 +25,54 @@ print(x.shape, y.shape, x_test.shape, y_test.shape)
 
 
 train_db = tf.data.Dataset.from_tensor_slices((x,y))
-train_db = train_db.shuffle(1000).map(preprocess).batch(1)
+train_db = train_db.shuffle(1000).map(preprocess).batch(128)
 
 test_db = tf.data.Dataset.from_tensor_slices((x_test,y_test))
-test_db = test_db.map(preprocess).batch(1)
+test_db = test_db.map(preprocess).batch(128)
 
 # sample = next(iter(train_db))
 # print('sample:', sample[0].shape, sample[1].shape,
 #       tf.reduce_min(sample[0]), tf.reduce_max(sample[0]))
 
 
+while True:
+    network = resnet18()
 
-network = resnet18()
-network.build(input_shape=(None, 32, 32, 3))
-network.summary()
+    # 这句话没有什么卵用啊
+    # network.build(input_shape=(None, 31, 32, 3))
 
-network.compile(optimizer=optimizers.Adam(lr=0.01),  # 优化器，用来优化参数
-	        	loss=tf.losses.CategoricalCrossentropy(from_logits=True),  # 定义loss函数，以让人知道你在优化什么
-        		metrics=['accuracy']  # 定义一个存储尺用来存储东西
-	            )
+    network.compile(optimizer=optimizers.Adam(lr=0.01),  # 优化器，用来优化参数
+                    loss=tf.losses.CategoricalCrossentropy(from_logits=True),  # 定义loss函数，以让人知道你在优化什么
+                    metrics=['accuracy']  # 定义一个存储尺用来存储东西
+                    )
 
-network.fit(train_db,  # 训练用哪个数据集，！！！！！
-            # 这里db的标签需要提前进行onehot编码
-            # x也是需要提前reshape的
-            epochs=1,  # 训练多少轮
-            validation_data=test_db,  # 测试用哪个数据集
-            validation_freq=1  # 测试的间隔：每两个epoch就测试一次
-            )
-network.evaluate(test_db)
 
-network.save_weights('weights.ckpt')
+    # 创建完成网络后加载权重
+    try:
+        print('加载权重中...')
+        network.load_weights('weights.ckpt')
+    except Exception as e:
+        print('加载失败！重新训练！')
+        network.summary()
 
+    network.fit(train_db,  # 训练用哪个数据集，！！！！！
+                # 这里db的标签需要提前进行onehot编码
+                # x也是需要提前reshape的
+                epochs=3,  # 训练多少轮
+                validation_data=test_db,  # 测试用哪个数据集
+                validation_freq=3  # 测试的间隔：每n个epoch就测试一次
+                )
+    network.evaluate(test_db)
+
+    try:
+        print('保存权重中...')
+        network.save_weights('weights.ckpt')
+    except Exception as e:
+        with open('./mylog.txt', 'a') as file_object:
+            file_object.write(str(e))
+
+# 一轮1.4个小时
+# os.system('shutdown -s -f -t 20')
 # def main():
 #
 #     # [b, 32, 32, 3] => [b, 1, 1, 512]
