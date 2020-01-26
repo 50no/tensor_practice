@@ -17,6 +17,8 @@ db = db.map(preprocess).shuffle(10000).batch(batchsz)
 db_test = tf.data.Dataset.from_tensor_slices((x_test,y_test))
 db_test = db_test.map(preprocess).batch(batchsz)
 
+print(next(iter(db)))
+
 model = Sequential([
     layers.Dense(256, activation=tf.nn.relu),
     layers.Dense(128, activation=tf.nn.relu),

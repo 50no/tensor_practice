@@ -39,7 +39,7 @@ while True:
     network = resnet18()
 
     # 这句话没有什么卵用啊
-    # network.build(input_shape=(None, 31, 32, 3))
+    network.build(input_shape=(None, 32, 32, 3))
 
     network.compile(optimizer=optimizers.Adam(lr=0.01),  # 优化器，用来优化参数
                     loss=tf.losses.CategoricalCrossentropy(from_logits=True),  # 定义loss函数，以让人知道你在优化什么
