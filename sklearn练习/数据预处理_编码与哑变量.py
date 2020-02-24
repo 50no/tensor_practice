@@ -8,9 +8,9 @@
 
 """
 import pandas as pd
-import printallvalues
+# import printallvalues
 
-data = pd.read_csv(r'./Narrativedata.csv',index_col=0)
+data = pd.read_csv(r'tensor_practice/sklearn练习/Narrativedata.csv',index_col=0)
 # 这里不用.values.mean()是因为numpy的mean（）会将nan也算进去，而pandas不会
 data.loc[:, 'Age'] = data.loc[:, 'Age'].fillna(data.loc[:, 'Age'].mean())
 data.dropna(how='any', axis=0, inplace=True)
@@ -19,7 +19,7 @@ data.loc[:, 'Survived'].fillna('No', inplace=True)
 data1 = data.copy()
 data2 = data.copy()
 print(data.head(10))
-#
+
 # todo: 1.标签的转换为数值型的方法
 from sklearn.preprocessing import LabelEncoder
 data.loc[:, 'Survived'] = LabelEncoder().fit_transform(data.loc[:, 'Survived'])
