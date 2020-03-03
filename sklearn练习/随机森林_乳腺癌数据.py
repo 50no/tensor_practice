@@ -13,7 +13,7 @@ data = load_breast_cancer()
 # print(data.target.shape)
 rfc = RandomForestClassifier(n_estimators=100, random_state=90)
 score_pre = cross_val_score(rfc, data.data, data.target, cv=10)
-# print(score_pre)
+print(score_pre)
 
 # 网格搜索应该在学习曲线之后进行，因为学习曲线可以根据图看到规律
 score_1ist = []

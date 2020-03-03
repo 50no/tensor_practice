@@ -17,7 +17,6 @@ db = db.map(preprocess).shuffle(10000).batch(batchsz)
 db_test = tf.data.Dataset.from_tensor_slices((x_test,y_test))
 db_test = db_test.map(preprocess).batch(batchsz)
 
-print(next(iter(db)))
 
 model = Sequential([
     layers.Dense(256, activation=tf.nn.relu),
@@ -41,6 +40,8 @@ def main():
                 # [b, 784] => [b, 10]
                 logits = model(x)
                 y_onehot = tf.one_hot(y, depth=10)
+                # print(logits[0])
+                # print(y_onehot[0])
                 # [b]
                 # loss_mse = tf.reduce_mean(tf.losses.MSE(y_onehot, logits))
                 loss_ce = tf.losses.categorical_crossentropy(y_onehot, logits, from_logits=True)

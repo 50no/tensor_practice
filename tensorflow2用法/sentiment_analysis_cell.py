@@ -4,29 +4,31 @@ import  numpy as np
 from    tensorflow import keras
 from    tensorflow.keras import layers
 
+
 tf.random.set_seed(22)
 np.random.seed(22)
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 assert tf.__version__.startswith('2.')
 
 batchsz = 128
+
+# the most frequest words
 total_words = 10000
 max_review_len = 80
 embedding_len = 100
-
 (x_train, y_train), (x_test, y_test) = keras.datasets.imdb.load_data(num_words=total_words)
-
-# maxlen: 单句话最大的句子长度
+# x_train:[b, 80]
+# x_test: [b, 80]
 x_train = keras.preprocessing.sequence.pad_sequences(x_train, maxlen=max_review_len)
 x_test = keras.preprocessing.sequence.pad_sequences(x_test, maxlen=max_review_len)
-
 
 db_train = tf.data.Dataset.from_tensor_slices((x_train, y_train))
 db_train = db_train.shuffle(1000).batch(batchsz, drop_remainder=True)
 db_test = tf.data.Dataset.from_tensor_slices((x_test, y_test))
 db_test = db_test.batch(batchsz, drop_remainder=True)
-# print('x_train shape:', x_train.shape, tf.reduce_max(y_train), tf.reduce_min(y_train))
-# print('x_test shape:', x_test.shape)
+print('x_train shape:', x_train.shape, tf.reduce_max(y_train), tf.reduce_min(y_train))
+print('x_test shape:', x_test.shape)
+
 
 
 class MyRNN(keras.Model):
@@ -35,8 +37,8 @@ class MyRNN(keras.Model):
         super(MyRNN, self).__init__()
 
         # [b, 64]
-        self.state0 = [tf.zeros([batchsz, units])]  # 第一层rnn的初始记忆参数
-        self.state1 = [tf.zeros([batchsz, units])]  # 第二层的
+        self.state0 = [tf.zeros([batchsz, units])]
+        self.state1 = [tf.zeros([batchsz, units])]
 
         # transform text to embedding representation
         # [b, 80] => [b, 80, 100]
@@ -81,18 +83,13 @@ class MyRNN(keras.Model):
         # p(y is pos|x)
         prob = tf.sigmoid(x)
 
-
-
         return prob
-
 
 def main():
     units = 64
     epochs = 4
 
     model = MyRNN(units)
-    model.build(input_shape=(None, 80))
-    model.summary()
     model.compile(optimizer = keras.optimizers.Adam(0.001),
                   loss = tf.losses.BinaryCrossentropy(),
                   metrics=['accuracy'])
@@ -103,8 +100,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-
-
-
-
